@@ -39,5 +39,5 @@ func (h *RecordHandlers) UploadS3(c *gin.Context) {
 
 	go h.recordService.UploadS3(c, input, s3Bucket, s3KeyPrefix)
 
-	c.JSON(http.StatusAccepted, gin.H{"message": "file processing started"})
+	c.JSON(http.StatusOK, gin.H{"message": "file processing started"})
 }

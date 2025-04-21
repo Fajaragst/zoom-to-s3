@@ -36,8 +36,6 @@ func NewZoomWebhookValidator(config config.ZoomConfig) gin.HandlerFunc {
 			return
 		}
 
-		log.Printf("Received headers - Signature: %s, Timestamp: %s", signature, timestamp)
-
 		// Read and restore the request body
 		bodyBytes, err := io.ReadAll(c.Request.Body)
 		if err != nil {
@@ -51,7 +49,6 @@ func NewZoomWebhookValidator(config config.ZoomConfig) gin.HandlerFunc {
 
 		// Validate the signature
 		message := fmt.Sprintf("v0:%s:%s", timestamp, string(bodyBytes))
-		log.Printf("Message to hash: %s", message)
 
 		// Create HMAC SHA-256 hash
 		mac := hmac.New(sha256.New, []byte(config.WebhookSecretToken))
@@ -60,18 +57,16 @@ func NewZoomWebhookValidator(config config.ZoomConfig) gin.HandlerFunc {
 
 		// Format the expected signature
 		expectedSignature := fmt.Sprintf("v0=%s", hashForVerify)
-		log.Printf("Expected signature: %s", expectedSignature)
 
 		// Compare signatures
 		if signature != expectedSignature {
-			log.Printf("Invalid signature. Expected: %s, Got: %s", expectedSignature, signature)
+			log.Printf("Invalid signature")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid webhook signature",
 			})
 			return
 		}
 
-		log.Println("Zoom webhook signature validated successfully")
 		c.Next()
 	}
 }
